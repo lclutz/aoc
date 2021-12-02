@@ -1,5 +1,5 @@
 
-ifile = "input.txt"
+ifile = "example.txt"
 
 with open(ifile, mode="r") as f:
     arrival_estimate = int(f.readline())
@@ -21,20 +21,12 @@ departure_time, bus_id = earliest_departure
 
 print(f"part1: {(departure_time - arrival_estimate) * bus_id}")
 
-first_bus_id = bus_ids_with_offsets[0][1]
-
-def test(timestamp):
-    for offset, bus_id in bus_ids_with_offsets[1:]:
-        if (timestamp + offset) % bus_id != 0:
-            return False
-    return True
-
 timestamp = 0
+step_size = 1
 
-try:
-    while not test(timestamp):
-        timestamp += first_bus_id
-except KeyboardInterrupt:
-    pass
+for offset, bus_id in bus_ids_with_offsets:
+    while (timestamp + offset) % bus_id != 0:
+        timestamp += step_size
+    step_size *= bus_id
 
 print(f"part2: {timestamp}")
