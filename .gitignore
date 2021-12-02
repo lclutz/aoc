@@ -1,0 +1,8 @@
+.vscode/
+
+input.txt
+
+*.exe
+*.o
+*.hi
+*.pdb
