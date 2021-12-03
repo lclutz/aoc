@@ -29,5 +29,4 @@ epsilon_rate = gamma_rate ^ (2 ** bit_len - 1)
 
 power_consumption = gamma_rate * epsilon_rate
 
-print(power_consumption)
-
+print(f"part1: {power_consumption}")
