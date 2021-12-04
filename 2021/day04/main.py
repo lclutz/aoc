@@ -50,3 +50,25 @@ for number in random_numbers:
             summe = sum([val for row in board for val, mark in row if not mark])
             print(f"part1: {number * summe}")
             break
+
+
+for number in random_numbers:
+
+    if len(boards) > 1:
+        boards = [[[(val, True) if number == val else (val, mark)
+                    for val, mark in row]
+                    for row in board]
+                    for board in boards]
+
+        boards = list(filter(lambda b: not winner(b), boards))
+
+    else:
+        boards = [[[(val, True) if number == val else (val, mark)
+                    for val, mark in row]
+                    for row in board]
+                    for board in boards]
+
+        if winner(boards[0]):
+            summe = sum([val for row in boards[0] for val, mark in row if not mark])
+            print(f"part2: {number * summe}")
+            break
