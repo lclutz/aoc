@@ -18,6 +18,14 @@ for i in range(2, len(lines)):
 
 boards.append(board)
 
+
+def mark(boards, number):
+    return [[[(val, True) if number == val else (val, mark)
+              for val, mark in row]
+              for row in board]
+              for board in boards]
+
+
 def winner(board):
     # check rows
     for row in board:
@@ -39,10 +47,7 @@ for number in random_numbers:
     if winner_found:
         break
 
-    boards = [[[(val, True) if number == val else (val, mark)
-                for val, mark in row]
-                for row in board]
-                for board in boards]
+    boards = mark(boards, number)
 
     for board in boards:
         if winner(board):
@@ -55,18 +60,12 @@ for number in random_numbers:
 for number in random_numbers:
 
     if len(boards) > 1:
-        boards = [[[(val, True) if number == val else (val, mark)
-                    for val, mark in row]
-                    for row in board]
-                    for board in boards]
+        boards = mark(boards, number)
 
         boards = list(filter(lambda b: not winner(b), boards))
 
     else:
-        boards = [[[(val, True) if number == val else (val, mark)
-                    for val, mark in row]
-                    for row in board]
-                    for board in boards]
+        boards = mark(boards, number)
 
         if winner(boards[0]):
             summe = sum([val for row in boards[0] for val, mark in row if not mark])
