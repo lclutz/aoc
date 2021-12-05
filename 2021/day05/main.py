@@ -11,7 +11,7 @@ with open(ifile, mode="r") as f:
 
 lines = [[int(x1), int(y1), int(x2), int(y2)]
          for x1, y1, x2, y2 in
-         [re.match(r"^([0-9]),([0-9]) -> ([0-9]),([0-9])$", line).groups()
+         [re.match(r"^([0-9]*),([0-9]*) -> ([0-9]*),([0-9]*)$", line).groups()
              for line in puzzle_input]]
 
 
