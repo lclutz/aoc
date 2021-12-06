@@ -1,5 +1,4 @@
 import re
-import itertools
 
 
 ifile = "example.txt"
@@ -41,3 +40,43 @@ for point in points:
 
 min_2_overlap = sum([1 if c >= 2 else 0 for c in counter.values()])
 print(f"part1: {min_2_overlap}")
+
+
+points = list()
+for x1, y1, x2, y2 in lines:
+    if x1 != x2 and y1 != y2:
+        while x1 != x2 and y1 != y2:
+            points.append((x1, y1))
+            x1 = (x1 + 1) if x1 <= x2 else (x1 - 1)
+            y1 = (y1 + 1) if y1 <= y2 else (y1 - 1)
+        points.append((x1, y1))
+    else:
+        xrange_begin = x1 if x1 < x2 else x2
+        xrange_end = x1 if x1 > x2 else x2
+        yrange_begin = y1 if y1 < y2 else y2
+        yrange_end = y1 if y1 > y2 else y2
+        for x in range(xrange_begin, xrange_end + 1):
+            for y in range(yrange_begin, yrange_end + 1):
+                points.append((x, y))
+
+
+counter = dict()
+for point in points:
+    if point in counter:
+        counter[point] += 1
+    else:
+        counter[point] = 1
+
+
+for y in range(10):
+    l = ""
+    for x in range(10):
+        if (x, y) in counter:
+            l += str(counter[(x, y)])
+        else:
+            l += "."
+    print(l)
+
+
+min_2_overlap = sum([1 if c >= 2 else 0 for c in counter.values()])
+print(f"part2: {min_2_overlap}")
