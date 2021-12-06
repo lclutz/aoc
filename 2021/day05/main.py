@@ -68,15 +68,5 @@ for point in points:
         counter[point] = 1
 
 
-for y in range(10):
-    l = ""
-    for x in range(10):
-        if (x, y) in counter:
-            l += str(counter[(x, y)])
-        else:
-            l += "."
-    print(l)
-
-
 min_2_overlap = sum([1 if c >= 2 else 0 for c in counter.values()])
 print(f"part2: {min_2_overlap}")
