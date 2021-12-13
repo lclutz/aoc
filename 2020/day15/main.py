@@ -4,18 +4,34 @@ ifile = "example.txt"
 with open(ifile, mode="r") as f:
     puzzle_input = [int(i) for i in f.readline().strip().split(",")]
 
-def say_next(history):
-    last_number_spoken = history[-1]
-    was_spoken_for_the_first_time = last_number_spoken not in history[:-1]
-    if was_spoken_for_the_first_time:
-        return 0
+cache = {num: idx for idx, num in enumerate(puzzle_input)}
+
+last_number_spoken = puzzle_input[-1]
+next_number = 0
+if last_number_spoken in puzzle_input[:-2]:
+    for i in range(1, len(history)):
+        if history[len(history) - i - 1] == last_number_spoken:
+            next_number = i
+            break
+
+for i in range(len(puzzle_input), 2020 - 1):
+    if next_number in cache.keys():
+        res = i - cache[next_number]
+        cache[next_number] = i
+        next_number = res
     else:
-        for i in range(1, len(history)):
-            if history[len(history) - i - 1] == last_number_spoken:
-                return i
+        cache[next_number] = i
+        next_number = 0
 
+print(f"part1: {next_number}")
 
-for i in range(2020 - len(puzzle_input)):
-    puzzle_input.append(say_next(puzzle_input))
+for i in range(2020 - 1, 30000000 - 1):
+    if next_number in cache.keys():
+        res = i - cache[next_number]
+        cache[next_number] = i
+        next_number = res
+    else:
+        cache[next_number] = i
+        next_number = 0
 
-print(f"part1: {puzzle_input[-1]}")
+print(f"part2: {next_number}")
