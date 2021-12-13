@@ -1,4 +1,4 @@
-ifile = "input.txt"
+ifile = "example.txt"
 
 with open(ifile, mode="r") as f:
     puzzle_input = [line.strip() for line in f]
@@ -124,6 +124,6 @@ for instruction in instructions[1:]:
                     new_field[y][x + wdiff] = "#"
         field = new_field
 
-print()
+print("part2:")
 for row in field:
     print("".join(row))
