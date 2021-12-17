@@ -23,8 +23,8 @@ def step(p, v):
     return (p, v)
 
 
-vxmin = math.floor(math.sqrt(txmin * 2 + 1) - 1)
-vxmax = math.ceil(math.sqrt(txmax * 2 + 1) - 1)
+vxmin = round(math.sqrt(txmin * 2 + 1/4) - 1/2)
+vxmax = round(math.sqrt(txmax * 2 + 1/4) - 1/2)
 
 vymin = -tymax
 vymax = -tymin
