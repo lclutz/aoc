@@ -1,7 +1,7 @@
 import re
 import math
 
-ifile = "example.txt"
+ifile = "input.txt"
 
 with open(ifile, mode="r") as f:
     puzzle_input = f.readline().strip()
@@ -36,7 +36,7 @@ for vy in range(vymax, vymin - 1, -1):
         p = (0, 0)
         v = (vx, vy)
         high_y = ((vy + 1) * vy) // 2
-        while p[0] <= txmax and p[1] >= tymax:
+        while p[0] <= txmax and p[1] >= tymin:
             p, v = step(p, v)
             px, py = p
             if txmin <= px and px <= txmax and tymin <= py and py <= tymax:
@@ -49,7 +49,7 @@ print(f"part1: {result}")
 
 def hit(v):
     p = (0,0)
-    while p[1] >= tymin:
+    while p[0] <= txmax and p[1] >= tymin:
         p, v = step(p, v)
         px, py = p
         if txmin <= px and px <= txmax and tymin <= py and py <= tymax:
