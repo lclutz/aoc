@@ -45,3 +45,22 @@ for vy in range(vymax, vymin - 1, -1):
                     break
 
 print(f"part1: {result}")
+
+
+def hit(v):
+    p = (0,0)
+    while p[1] >= tymin:
+        p, v = step(p, v)
+        px, py = p
+        if txmin <= px and px <= txmax and tymin <= py and py <= tymax:
+            return True
+    return False
+
+
+vs = list()
+for vy in range(tymin, abs(tymin) + 1):
+    for vx in range(0, txmax + 1):
+        vs.append((vx, vy))
+vs = [v for v in vs if hit(v)]
+
+print(f"part2: {len(vs)}")
