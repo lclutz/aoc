@@ -1,7 +1,7 @@
 import re
 import math
 
-ifile = "input.txt"
+ifile = "example.txt"
 
 with open(ifile, mode="r") as f:
     puzzle_input = f.readline().strip()
