@@ -1,229 +1,100 @@
-from math import floor, ceil
-
 ifile = "example.txt"
 
+with open(ifile, mode="r") as f:
+    puzzle_input = [line.strip() for line in f]
 
-class Node:
+class SnailfischNumber:
 
-    def __init__(self, left=None, right=None, parent=None):
-        self.left = left
-        self.right = right
-        self.parent = parent
+    def __init__(self, string=""):
+        self.numbers = list()
+        self.depths = list()
+
+        depth = -1
+        for i in range(len(string)):
+            if string[i] in "0123456789":
+                self.numbers.append(int(string[i]))
+                self.depths.append(depth)
+            elif string[i] == '[':
+                depth += 1
+            elif string[i] == ']':
+                depth -= 1
 
     def __repr__(self):
-        return f"[{self.left},{self.right}]"
+        return str(self.numbers) + str(self.depths)
+
+    def __eq__(self, other):
+        if isinstance(other, SnailfischNumber):
+            l = min(len(self.numbers), len(other.numbers))
+            ns = [self.numbers[i] == other.numbers[i] for i in range(l)]
+            ds = [self.depths[i] == other.depths[i] for i in range(l)]
+            return all(ns) and all(ds)
+        return False
 
     def __add__(self, other):
-        n = Node(left=self, right=other)
-        n.left.parent = n
-        n.right.parent = n
-        node_to_explode = n.explosion_pending()
-        node_to_split = n.explosion_pending()
-        while node_to_explode or node_to_split:
-            if node_to_explode:
-                node_to_explode.explode()
-                node_to_explode = n.explosion_pending()
-                node_to_split = n.split_pending()
-                continue
-            if node_to_split:
-                node_to_split.split()
-                node_to_explode = n.explosion_pending()
-                node_to_split = n.split_pending()
-        return n
-
-    def split(self):
-        if isinstance(self.left, int) and self.left >= 10:
-            self.left = Node(left=floor(self.left/2), right=ceil(self.left/2), parent=self)
-        elif isinstance(self.right, int) and self.right >= 10:
-            self.right = Node(left=floor(self.right/2), right=ceil(self.right/2), parent=self)
-
-    def split_pending(self):
-        if isinstance(self.left, int) and self.left >= 10:
-            return self
-        if isinstance(self.right, int) and self.right >= 10:
-            return self
-        if isinstance(self.left, Node):
-            split_pending_left = self.left.split_pending()
-            if split_pending_left:
-                return split_pending_left
-        if isinstance(self.right, Node):
-            split_pending_right = self.right.split_pending()
-            if split_pending_right:
-                return split_pending_right
-        return None
+        result = SnailfischNumber()
+        result.depths.extend([d + 1 for d in self.depths])
+        result.depths.extend([d + 1 for d in other.depths])
+        result.numbers.extend(self.numbers)
+        result.numbers.extend(other.numbers)
+        result.reduce()
+        return result
 
     def explode(self):
-        p = self.parent
-        direct_predecessor = self
-        pleft = pright = None
-        while p and not (pleft and pright):
-            if (not pleft) and not (p.left is direct_predecessor):
-                if isinstance(p.left, Node):
-                    pleft = p.left
-                else:
-                    pleft = p
-            if (not pright) and not (p.right is direct_predecessor):
-                if isinstance(p.right, Node):
-                    pright = p.right
-                else:
-                    pright = p
-            direct_predecessor = p
-            p = p.parent
-        if pleft:
-            pleft = pleft.find_right_most_node_for_explosion()
-            if isinstance(pleft.right, int):
-                pleft.right += self.left
-            else:
-                pleft.left += self.left
-        if pright:
-            pright = pright.find_left_most_node_for_explosion()
-            if isinstance(pright.left, int):
-                pright.left += self.right
-            else:
-                pright.right += self.right
+        for i in range(len(self.depths) - 1):
+            if self.depths[i] == self.depths[i + 1] and self.depths[i] >= 4:
+                l, r = self.numbers[i], self.numbers[i + 1]
+                if i >= 1:
+                    self.numbers[i - 1] += l
+                if i < (len(self.numbers) - 2):
+                    self.numbers[i + 2] += r
+                self.numbers[i] = 0
+                self.depths[i] -= 1
+                del self.numbers[i + 1]
+                del self.depths[i + 1]
+                return True
+        return False
 
-        if self.parent.left is self:
-            self.parent.left = 0
-        else:
-            self.parent.right = 0
+    def split(self):
+        for i in range(len(self.numbers)):
+            if self.numbers[i] >= 10:
+                old_number = self.numbers[i]
+                self.numbers[i] = old_number // 2
+                self.numbers.insert(i + 1, old_number // 2 + (old_number % 2))
+                self.depths[i] += 1
+                self.depths.insert(i + 1, self.depths[i])
+                return True
+        return False
 
-    def find_right_most_node_for_explosion(self):
-        if isinstance(self.right, int):
-            return self
-        if isinstance(self.left, int):
-            return self
-        if isinstance(self.right, Node):
-            right_search = self.right.find_right_most_node_for_explosion()
-            if right_search:
-                return right_search
-        if isinstance(self.left, Node):
-            left_search = self.left.find_right_most_node_for_explosion()
-            if left_search:
-                return left_search
-
-    def find_left_most_node_for_explosion(self):
-        if isinstance(self.left, int):
-            return self
-        if isinstance(self.right, int):
-            return self
-        if isinstance(self.left, Node):
-            left_search = self.left.find_left_most_node_for_explosion()
-            if left_search:
-                return left_search
-        if isinstance(self.right, Node):
-            right_search = self.right.find_left_most_node_for_explosion()
-            if right_search:
-                return right_search
-
-    def explosion_pending(self, depth=0):
-        if not (isinstance(self.left, int) and isinstance(self.right, int)):
-            if isinstance(self.left, Node):
-                explosion_pending_left = self.left.explosion_pending(depth + 1)
-                if explosion_pending_left:
-                    return explosion_pending_left
-            if isinstance(self.right, Node):
-                explosion_pending_right = self.right.explosion_pending(depth + 1)
-                if explosion_pending_right:
-                    return explosion_pending_right
-            return None
-        else:
-            return self if depth >= 4 else None
+    def reduce(self):
+        exploded = splitted = True
+        while exploded or splitted:
+            exploded = self.explode()
+            while exploded:
+                exploded = self.explode()
+            splitted = self.split()
 
     def magnitude(self):
-        magnitude_left, magnitude_right = self.left, self.right
-        if isinstance(self.left, Node):
-            magnitude_left = self.left.magnitude()
-        if isinstance(self.right, Node):
-            magnitude_right = self.right.magnitude()
-        return 3 * magnitude_left + 2 * magnitude_right
-
-
-def lists_to_tree(ls, parent=None):
-    assert(len(ls) == 2)
-    n = Node()
-    l, r = ls
-    if isinstance(l, list):
-        l = lists_to_tree(l, n)
-    if isinstance(r, list):
-        r = lists_to_tree(r, n)
-    n.left = l
-    n.right = r
-    n.parent = parent
-    return n
-
-
-def tests():
-    a = lists_to_tree([[[0,[4,5]],[0,0]],[[[4,5],[2,6]],[9,5]]])
-    b = lists_to_tree([7,[[[3,7],[4,3]],[[6,3],[8,8]]]])
-    print(f"  {a}")
-    print(f"+ {b}")
-    print(f"= {a + b}")
-    print()
-
-    a = lists_to_tree([[[[4,0],[5,4]],[[7,7],[6,0]]],[[8,[7,7]],[[7,9],[5,0]]]])
-    b = lists_to_tree([[2,[[0,8],[3,4]]],[[[6,7],1],[7,[1,6]]]])
-    print(f"  {a}")
-    print(f"+ {b}")
-    print(f"= {a + b}")
-    print()
-
-    a = lists_to_tree([[[[6,7],[6,7]],[[7,7],[0,7]]],[[[8,7],[7,7]],[[8,8],[8,0]]]])
-    b = lists_to_tree([[[[2,4],7],[6,[0,5]]],[[[6,8],[2,8]],[[2,1],[4,5]]]])
-    print(f"  {a}")
-    print(f"+ {b}")
-    print(f"= {a + b}")
-    print()
-
-    a = lists_to_tree([[[[7,0],[7,7]],[[7,7],[7,8]]],[[[7,7],[8,8]],[[7,7],[8,7]]]])
-    b = lists_to_tree([7,[5,[[3,8],[1,4]]]])
-    print(f"  {a}")
-    print(f"+ {b}")
-    print(f"= {a + b}")
-    print()
-
-    a = lists_to_tree([[[[7,7],[7,8]],[[9,5],[8,7]]],[[[6,8],[0,8]],[[9,9],[9,0]]]])
-    b = lists_to_tree([[2,[2,2]],[8,[8,1]]])
-    print(f"  {a}")
-    print(f"+ {b}")
-    print(f"= {a + b}")
-    print()
-
-    a = lists_to_tree([[[[6,6],[6,6]],[[6,0],[6,7]]],[[[7,7],[8,9]],[8,[8,1]]]])
-    b = lists_to_tree([2,9])
-    print(f"  {a}")
-    print(f"+ {b}")
-    print(f"= {a + b}")
-    print()
-
-    a = lists_to_tree([[[[6,6],[7,7]],[[0,7],[7,7]]],[[[5,5],[5,6]],9]])
-    b = lists_to_tree([1,[[[9,3],9],[[9,0],[0,7]]]])
-    print(f"  {a}")
-    print(f"+ {b}")
-    print(f"= {a + b}")
-    print()
-
-    a = lists_to_tree([[[[7,8],[6,7]],[[6,8],[0,8]]],[[[7,7],[5,0]],[[5,5],[5,6]]]])
-    b = lists_to_tree([[[5,[7,4]],7],1])
-    print(f"  {a}")
-    print(f"+ {b}")
-    print(f"= {a + b}")
-    print()
-
-    a = lists_to_tree([[[[7,7],[7,7]],[[8,7],[8,7]]],[[[7,0],[7,7]],9]])
-    b = lists_to_tree([[[[4,2],2],6],[8,7]])
-    print(f"  {a}")
-    print(f"+ {b}")
-    print(f"= {a + b}")
+        mag = self.numbers.copy()
+        depths = self.depths.copy()
+        while len(mag) > 1:
+            d = max(depths)
+            i = 1
+            while i < len(mag):
+                if depths[i] == d and depths[i] == depths[i - 1]:
+                    mag[i - 1] = mag[i - 1] * 3 + mag[i] * 2
+                    depths[i - 1] -= 1
+                    del mag[i]
+                    del depths[i]
+                i += 1
+        return mag[0]
 
 
 def part1():
-    with open(ifile, mode="r") as f:
-        puzzle_input = [lists_to_tree(eval(line)) for line in f]
-
-    result = puzzle_input[0]
-    for num in puzzle_input[1:]:
-        result += num
+    result = SnailfischNumber(puzzle_input[0])
+    for n in puzzle_input[1:]:
+        result += SnailfischNumber(n)
     print(f"part1: {result.magnitude()}")
 
 
-tests()
+if __name__ == '__main__':
+    part1()
