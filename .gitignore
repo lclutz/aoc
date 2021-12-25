@@ -1,5 +1,6 @@
 .vscode/
 out/
+__pycache__/
 
 input.txt
 
