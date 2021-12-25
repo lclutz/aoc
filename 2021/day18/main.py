@@ -96,5 +96,16 @@ def part1():
     print(f"part1: {result.magnitude()}")
 
 
+def part2():
+    magnitudes = list()
+    for i in range(len(puzzle_input)):
+        for j in range(len(puzzle_input)):
+            if i != j:
+                magnitudes.append((SnailfischNumber(puzzle_input[i]) +
+                                   SnailfischNumber(puzzle_input[j])).magnitude())
+    print(f"part2: {max(magnitudes)}")
+
+
 if __name__ == '__main__':
     part1()
+    part2()
